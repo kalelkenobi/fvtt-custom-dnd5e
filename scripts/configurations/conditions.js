@@ -92,7 +92,7 @@ export function getSettingDefault(key = null) {
   if ( key ) return data;
 
   Object.values(data).forEach(value => {
-    value.name = game.i18n.localize(value.name);
+    value.name = game.i18n.localize(value?.name ?? value?.label);
   });
 
   const sortedData = Object.fromEntries(
@@ -136,7 +136,7 @@ function buildData(config) {
     const conditionTypes = {};
 
     Object.entries(data).forEach(([key, value]) => {
-      const conditionName = game.i18n.localize(value.name);
+      const conditionName = game.i18n.localize(value?.name ?? value?.label);
       if ( conditionName > bloodied.conditionType.name && !conditionTypes.bloodied ) {
         conditionTypes.bloodied = bloodied.conditionType;
         conditionTypes.bloodied.sheet = true;
@@ -153,8 +153,8 @@ function buildData(config) {
       if ( !data[statusEffect.id].pseudo ) data[statusEffect.id].sheet = true;
     } else {
       data[statusEffect.id] = statusEffect;
-      data[statusEffect.id].img = statusEffect.img;
-      data[statusEffect.id].name = statusEffect.name;
+      data[statusEffect.id].img = statusEffect?.img ?? statusEffect?.icon;
+      data[statusEffect.id].name = statusEffect?.name ?? statusEffect?.label;
     }
   };
 
@@ -204,14 +204,14 @@ export function setConfig(data = null) {
   Object.entries(data)
     .filter(([_, value]) => value.visible || value.visible === undefined)
     .forEach(([key, value]) => {
-      const localisedName = game.i18n.localize(value.name ?? value);
+      const localisedName = game.i18n.localize(value?.name ?? value?.label ?? value);
 
       // Merge with default config in case their are any new properties
       value = foundry.utils.mergeObject(foundry.utils.deepClone(getSettingDefault(key)) ?? {}, value);
 
       if ( value.sheet || value.pseudo ) {
         config.conditionTypes[key] = {
-          img: value.img,
+          img: value?.img ?? value?.icon,
           name: localisedName,
           ...(value.levels && { levels: value.levels }),
           ...(value.pseudo && { pseudo: value.pseudo }),
@@ -229,7 +229,7 @@ export function setConfig(data = null) {
         ...(value.coverBonus !== undefined && { coverBonus: value.coverBonus }),
         ...(value.exclusiveGroup !== undefined && { exclusiveGroup: value.exclusiveGroup }),
         id: key,
-        img: value.img,
+        img: value?.img ?? value?.icon,
         ...(value.levels !== undefined && { levels: value.levels }),
         name: localisedName,
         ...(value.order !== undefined && { order: value.order }),
